@@ -86,6 +86,11 @@ keys = [
     Key([mod], "b", lazy.spawn("firefox"), desc="Spawn firefox browser"),
     Key([mod], "f", lazy.spawn("pcmanfm"), desc="Run pcmanfm"),
     Key([mod], "d", lazy.spawn("rofi -show drun"), desc="Rofi show drun"),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl -d acpi_video0 set +10%"), desc="Increase Brightness"),
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl -d acpi_video0 set 10%-"), desc="Decrease Brightness"),
+    # Key([], "XF86KbdBrightnessDown", lazy.spawn("brightnessctl --device='smc::kbd_backlight' set 5-")),
+    # Key([], "XF86KbdBrightnessUp", lazy.spawn("brightnessctl --device='smc::kbd_backlight' set +5")),
+
 ]
 
 # Add key bindings to switch VTs in Wayland.
@@ -139,15 +144,15 @@ layouts = [
     # layout.MonadWide(),
     # layout.RatioTile(),
     # layout.Tile(),
-    # layout.TreeTab(),
+     # layout.TreeTab(),
     # layout.VerticalTile(),
     # layout.Zoomy(),
 ]
 
 widget_defaults = dict(
     font="JetBrains Mono",
-    fontsize=18,
-    padding=4,
+    fontsize=24,
+    padding=6,
 )
 extension_defaults = widget_defaults.copy()
 
@@ -169,11 +174,27 @@ screens = [
                 # widget.TextBox("Press &lt;M-r&gt; to spawn", foreground="#d75f5f"),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
+                widget.Backlight(
+                    backlight_name="acpi_video0",  # Change this if needed
+                    format="🌞 {percent:2.0%}",
+                    mouse_callbacks={
+        		"Button4": lambda: qtile.cmd_spawn("brightnessctl set +5%"),
+        		"Button5": lambda: qtile.cmd_spawn("brightnessctl set 5%-"),
+        		"Button1": lambda: qtile.cmd_spawn("brightnessctl set 50%"),  # optional
+		    },
+                ),
+                widget.Battery(
+                    format="🔋 {percent:2.0%} {char}",
+                    charge_char="↑",
+                    discharge_char="↓",
+                    empty_char="!",
+                    full_char="✓",
+                ),
                 widget.Systray(),
                 widget.Clock(format="%Y-%m-%d %a %I:%M %p"),
                 # widget.QuickExit(),
             ],
-            48,
+           80,
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         ),
