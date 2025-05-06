@@ -4,11 +4,23 @@
 
 { config, lib, pkgs, ... }:
 
+# Home-Manager Module
+  let
+    home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-24.11.tar.gz";
+  in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      # Include Home-Manger defined above
+      (import "${home-manager}/nixos")
     ];
+
+  home-manager.useUserPackages = true;
+  home-manager.useGlobalPkgs = true;
+  home-manager.backupFileExtension = "backup";
+ #  home-manager.users.dennis = import ./home.nix;
+  home-manager.users.dennis = import /home/dennis/home-manager-dotfiles/home.nix;
 
   # Remove generations older than 7 days
   nix.gc = {
@@ -25,7 +37,6 @@
   nix.settings.download-buffer-size = 52428000;
 
   boot.initrd.availableKernelModules = [ "nvme" ];
-
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -33,7 +44,9 @@
   networking.hostName = "dennix"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default
+  security.polkit.enable = true;
+  programs.nm-applet.enable = true;
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -55,17 +68,33 @@
   services.xserver = {
     enable = true;
     windowManager.qtile.enable = true;
+    displayManager.defaultSession = "qtile";
     displayManager.sessionCommands = ''
       xwallpaper --zoom ~/walls/paint.jpg
-      xset r rate 200 35 & 
+      xset r rate 200 35 &
+      picom --config ~/.config/picom/picom.conf &
     '';
   };
 
   services.picom = {
-    enable = true;
+    enable = false;
     backend = "glx";
     fade = false; 
   };
+
+  services.openssh = {
+    enable = true;
+      settings = {
+        PermitRootLogin = "no";
+        PasswordAuthentication = true;
+    };
+  };
+
+  # Enable GTK dark theme
+  environment.variables = {
+    GTK_THEME = "Adwaita:dark";  # or another dark GTK theme if you prefer
+  };
+
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
@@ -88,7 +117,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.dennis = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "networkmanager" "video" ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
     ];
@@ -112,6 +141,11 @@
     rofi
     git
     pfetch
+    neofetch
+    networkmanagerapplet
+    brightnessctl
+    xorg.xev
+    gnome-themes-extra
   ];
 
   fonts.packages = with pkgs; [

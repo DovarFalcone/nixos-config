@@ -1,12 +1,10 @@
 # i use nix btw
 
-sudo cp -r /etc/nixos/* ~/nixos-dotfiles/
 
-cp -R ~/.config/alacritty nixos-dotfiles/alacritty
+sudo cp /etc/nixos/configuration.nix ~/home-manager-nixos/
 
-cp -R ~/.config/qtile nixos-dotfiles/qtile
+cd ~/home-manager-dotfiles
 
-cd ~/nixos-dotfiles
 git status            # See what changed
 git add .
 git commit -m "Update config: <describe what changed>"
